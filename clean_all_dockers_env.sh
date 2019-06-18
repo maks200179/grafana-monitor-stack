@@ -6,9 +6,9 @@ docker stop $(docker ps -a -q)
 docker rm $(docker ps -a -q)
 
 
-docker volume prune 
-docker system prune 
-docker image prune
+docker volume prune  -f
+docker system prune -f 
+docker image prune -f
  
 
 #docker rmi $(docker images -q)
