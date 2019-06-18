@@ -1,0 +1,76 @@
+FROM smartfarm1/centos7:latest
+
+RUN localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
+ENV LANG en_US.UTF-8
+ENV container docker
+
+RUN (cd /lib/systemd/system/sysinit.target.wants/; for i in *; do [ $i == \
+systemd-tmpfiles-setup.service ] || rm -f $i; done); \
+rm -f /lib/systemd/system/multi-user.target.wants/*;\
+rm -f /etc/systemd/system/*.wants/*;\
+rm -f /lib/systemd/system/local-fs.target.wants/*; \
+rm -f /lib/systemd/system/sockets.target.wants/*udev*; \
+rm -f /lib/systemd/system/sockets.target.wants/*initctl*; \
+rm -f /lib/systemd/system/basic.target.wants/*;\
+rm -f /lib/systemd/system/anaconda.target.wants/*;
+
+
+
+
+
+# Set root password
+RUN echo 'root:1980nov16' | chpasswd
+
+#RUN yum clean all
+#RUN yum clean metadata
+#RUN rm -rf /var/cache/yum
+RUN yum -y update
+RUN yum -y install epel-release
+
+
+RUN yum -y install  openssh-server 
+
+
+
+
+#RUN yum -y update
+
+RUN yum -y install nginx
+RUN sh -c "echo -n 'smart-farm:' >> /etc/nginx/.htpasswd"
+RUN sh -c "openssl passwd K5f1cv29 >> /etc/nginx/.htpasswd"
+RUN echo "nginx on CentOS 6 inside Docker" > /usr/share/nginx/html/index.html
+RUN systemctl enable nginx
+RUN yum clean all
+#RUN rm -rf /var/cache/yum
+
+# Set sshd config
+RUN rm /etc/ssh/sshd_config
+COPY production/sshd_config /etc/ssh/
+RUN chown root:root /etc/ssh/sshd_config
+RUN chmod -R 600 /etc/ssh/sshd_config
+
+
+# Setting DateTime Zone
+RUN cp -p /usr/share/zoneinfo/Asia/Jerusalem /etc/localtime
+
+
+
+
+
+
+
+
+
+
+# Set memcached configuration file
+RUN rm /etc/nginx/nginx.conf
+COPY production/nginx.conf /etc/nginx/
+RUN chown root:root /etc/nginx/nginx.conf
+RUN chmod -R 644 /etc/nginx/nginx.conf
+
+
+
+ENTRYPOINT ["/usr/sbin/init"]
+VOLUME [ "/sys/fs/cgroup" ]
+
+

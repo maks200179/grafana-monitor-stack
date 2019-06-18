@@ -1,0 +1,7 @@
+{
+    "name":"Prometheus",
+    "type":"prometheus",
+    "url":"http://prometheus.smart-monitor.com:9090",
+    "access":"proxy",
+    "basicAuth":false
+  }
